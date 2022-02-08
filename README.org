@@ -1,0 +1,32 @@
+#+TITLE: Build nextcloud with a self-signed https in docker
+
+* Requirements
+1. ~docker~ and ~docker-compose~
+2. ~openssl~
+* Usage
+create a self-signed certificate in your private directory (=~/.private= here)
+#+begin_src bash
+openssl req -x509 -out <host_ip>.crt -keyout <host_ip>.key \
+  -newkey rsa:4096 -nodes -sha256 -days 90\
+  -subj '/CN=<host_ip>' -extensions EXT -config <( \
+   printf "[dn]\nCN=<host_ip>\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:<host_ip>\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+#+end_src
+=<host_ip>= is your machine's real ip. For more details see [[https://wiki.archlinux.org/title/OpenSSL#Generate_a_self-signed_certificate_with_private_key_in_a_single_command][Generate_a_self-signed_certificate_with_private_key_in_a_single_command]] and
+[[https://letsencrypt.org/docs/certificates-for-localhost/#making-and-trusting-your-own-certificates][making-and-trusting-your-own-certificates]].
+
+#+begin_src fish
+git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
+#+end_src
+
+change =<host_ip>= in ~caddyfile~ to your machine's real ip. Append password after =MYSQL_ROOT_PASSWORD= in ~docker-compose.yaml~. =~/.private/db.env= should have following contents.
+#+begin_verse
+MYSQL_PASSWORD=
+MYSQL_DATABASE=nextcloud
+MYSQL_USER=nextcloud
+#+end_verse
+
+run with
+#+begin_src fish
+docker-compose up -d
+#+end_src
+note that the database and nextcloud files are stored within docker volume, so don't prune them accidently.
