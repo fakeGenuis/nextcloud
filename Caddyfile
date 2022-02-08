@@ -1,0 +1,25 @@
+{
+    # debug
+    log {
+        output file /var/log/caddy/caddy.log
+        format console
+    }
+}
+
+:443 {
+    encode zstd gzip
+    log {
+        output file /var/log/caddy/web.log
+    }
+
+    reverse_proxy app:80 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_down Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" #enable HSTS
+    }
+
+    tls /etc/ssl/private/<host_ip>.crt /etc/ssl/private/<host_ip>.key
+
+    rewrite /.well-known/carddav /remote.php/dav
+    rewrite /.well-known/caldav /remote.php/dav
+}

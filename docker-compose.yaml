@@ -1,0 +1,45 @@
+version: "3"
+
+volumes:
+  db:
+  nextcloud:
+
+services:
+  db:
+    image: mariadb
+    container_name: nc_db
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=
+    env_file:
+      - ~/.private/db.env
+
+  app:
+    build: .
+    container_name: nc_app
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      - MYSQL_HOST=db
+    env_file:
+      - ~/.private/db.env
+    depends_on:
+      - db
+
+  caddy:
+    image: caddy
+    container_name: nc_caddy
+    environment:
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ~/.private/log/caddy:/var/log/caddy
+      - ~/.private:/etc/ssl/private
+    ports:
+      - "443:443"
+    depends_on:
+      - db
+      - app
