@@ -25,6 +25,9 @@ services:
       - nextcloud:/var/www/html
     environment:
       - MYSQL_HOST=db
+      - TRUSTED_PROXIES='192.168.0.0/16'
+      - NEXTCLOUD_TRUSTED_DOMAINS=<host_ip>
+      - OVERWRITEPROTOCOL=https
     env_file:
       - ~/.private/db.env
     depends_on:
@@ -33,10 +36,9 @@ services:
   caddy:
     image: caddy
     container_name: nc_caddy
-    environment:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ~/.private/log/caddy:/var/log/caddy
+      - /var/log/caddy:/var/log/caddy
       - ~/.private:/etc/ssl/private
     ports:
       - "443:443"
