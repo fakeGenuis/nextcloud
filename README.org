@@ -11,8 +11,9 @@ openssl req -x509 -out <host_ip>.crt -keyout <host_ip>.key \
   -subj '/CN=<host_ip>' -extensions EXT -config <( \
    printf "[dn]\nCN=<host_ip>\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:<host_ip>\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
 #+end_src
-=<host_ip>= is your machine's real ip. For more details see [[https://wiki.archlinux.org/title/OpenSSL#Generate_a_self-signed_certificate_with_private_key_in_a_single_command][Generate_a_self-signed_certificate_with_private_key_in_a_single_command]] and
-[[https://letsencrypt.org/docs/certificates-for-localhost/#making-and-trusting-your-own-certificates][making-and-trusting-your-own-certificates]].
+=<host_ip>= is your machine's real ip. For more details see
+- [[https://wiki.archlinux.org/title/OpenSSL#Generate_a_self-signed_certificate_with_private_key_in_a_single_command][Generate_a_self-signed_certificate_with_private_key_in_a_single_command]]
+- [[https://letsencrypt.org/docs/certificates-for-localhost/#making-and-trusting-your-own-certificates][making-and-trusting-your-own-certificates]].
 
 #+begin_src fish
 git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
@@ -30,3 +31,26 @@ run with
 docker-compose up -d
 #+end_src
 note that the database and nextcloud files are stored within docker volume, so don't prune them accidently.
+
+stop with
+#+begin_src fish
+docker-compose down
+#+end_src
+
+update with
+#+begin_src fish
+docker-compose pull
+#+end_src
+
+* Notion
+- This is for =proxy header not configured rightly= warning
+
+  space separated list for =TRUSTED_PROXIES= in ~docker-compose.yml~ may not work properly
+  you may add following entry in ~/var/www/html/config/config.php~
+  #+begin_src php
+    'trusted_proxies' =>
+    array (
+      0 => '\'192.168.0.0/16\'',
+      1 => '\'172.16.0.0/12\'',
+    ),
+  #+end_src
