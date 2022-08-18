@@ -17,7 +17,7 @@
         header_down Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" #enable HSTS
     }
 
-    tls /etc/ssl/private/<host_ip>.crt /etc/ssl/private/<host_ip>.key
+    tls /etc/ssl/private/${host_ip}.crt /etc/ssl/private/${host_ip}.key
 
     rewrite /.well-known/carddav /remote.php/dav
     rewrite /.well-known/caldav /remote.php/dav
