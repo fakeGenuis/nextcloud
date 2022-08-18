@@ -13,9 +13,9 @@ services:
     volumes:
       - db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=${pass_db}
     env_file:
-      - ~/.private/db.env
+      - ./.private/db.env
 
   app:
     build: .
@@ -26,10 +26,10 @@ services:
     environment:
       - MYSQL_HOST=db
       - TRUSTED_PROXIES='192.168.0.0/16'
-      - NEXTCLOUD_TRUSTED_DOMAINS=<host_ip>
+      - NEXTCLOUD_TRUSTED_DOMAINS=${host_ip}
       - OVERWRITEPROTOCOL=https
     env_file:
-      - ~/.private/db.env
+      - ./.private/db.env
     depends_on:
       - db
 
@@ -39,7 +39,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - /var/log/caddy:/var/log/caddy
-      - ~/.private:/etc/ssl/private
+      - ./.private:/etc/ssl/private
     ports:
       - "443:443"
     restart: always
