@@ -16,6 +16,10 @@ systemctl enable --now docker.service
 :header-args:bash: :tangle build.sh :file-mode (identity #o755) :shebang #!/usr/bin/env bash
 :END:
 
+*Cation!!*
+If you run =./build.sh= after =docker-compose up= your certificate will be
+updated
+
 tldr: run
 #+begin_src bash :tangle no
 git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
@@ -24,7 +28,6 @@ git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
 
 #+begin_src bash
 host_ip=xxx
-pass_db=$(pwgen -c -n -y -s -1 -r \$\#\,)
 #+end_src
 substitute xxx with your host's real ip
 
@@ -52,9 +55,8 @@ cat ./templates/docker-compose.yaml | envsubst > docker-compose.yaml
 see [[https://stackoverflow.com/questions/2914220/bash-templating-how-to-build-configuration-files-from-templates-with-bash][Bash Templating: How to build configuration files from templates with Bash? -...]]
 #+begin_src bash
 envsub () {
-    fi="$1"
     eval "cat <<EOF
-    $(<${fi})
+    $(<$1)
 EOF"
 }
 
@@ -64,15 +66,12 @@ envsub ./templates/docker-compose.yaml > docker-compose.yaml
 
 =./.private/db.env= should have following contents.
 #+begin_src bash
-cat > ./.private/db.env <<EOF
+[[ -f ./.private/db.env ]] || cat > ./.private/db.env <<EOF
+MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 MYSQL_DATABASE=nextcloud
 MYSQL_USER=nextcloud
 EOF
-#+end_src
-
-#+begin_src bash
-git stash save
 #+end_src
 
 * Usage and maintain
