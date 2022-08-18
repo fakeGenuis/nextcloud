@@ -9,7 +9,7 @@ openssl req -x509 -out ./.private/${host_ip}.crt -keyout ./.private/${host_ip}.k
 
 envsub () {
     eval "cat <<EOF
-    $(<$1)
+$(<$1)
 EOF"
 }
 

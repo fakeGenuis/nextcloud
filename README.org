@@ -56,7 +56,7 @@ see [[https://stackoverflow.com/questions/2914220/bash-templating-how-to-build-c
 #+begin_src bash
 envsub () {
     eval "cat <<EOF
-    $(<$1)
+$(<$1)
 EOF"
 }
 
