@@ -27,14 +27,14 @@ git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
 #+end_src
 
 #+begin_src bash
-host_ip=xxx
+[ -z "$1" ] || host_ip=xxx && host_ip="$1"
 #+end_src
 substitute xxx with your host's real ip
 
 create a self-signed certificate in your private directory (=./.private= here)
 #+begin_src bash
-[[ -d ./.private  ]]|| mkdir ./.private/
-openssl req -x509 -out ./.private/${host_ip}.crt -keyout ./.private/${host_ip}.key \
+[ -d ./.private ] || mkdir ./.private/
+[ -f ./.private/${host_ip}.key ] || openssl req -x509 -out ./.private/${host_ip}.crt -keyout ./.private/${host_ip}.key \
   -newkey rsa:4096 -nodes -sha256 -days 90\
   -subj '/CN=${host_ip}' -extensions EXT -config <( \
    printf "[dn]\nCN=${host_ip}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:${host_ip}\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
@@ -66,7 +66,7 @@ envsub ./templates/docker-compose.yaml > docker-compose.yaml
 
 =./.private/db.env= should have following contents.
 #+begin_src bash
-[[ -f ./.private/db.env ]] || cat > ./.private/db.env <<EOF
+[ -f ./.private/db.env ] || cat > ./.private/db.env <<EOF
 MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 MYSQL_DATABASE=nextcloud

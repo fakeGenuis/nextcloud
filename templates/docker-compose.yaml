@@ -4,6 +4,14 @@ volumes:
   db:
   nextcloud:
 
+# https://stackoverflow.com/a/43981857
+networks:
+  default:
+    name: nextcloud
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br_nextcloud
+
 services:
   db:
     image: mariadb
@@ -12,6 +20,8 @@ services:
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
     volumes:
       - db:/var/lib/mysql
+    environment:
+      - TZ=Asia/Shanghai
     env_file:
       - ./.private/db.env
 
@@ -22,10 +32,13 @@ services:
     volumes:
       - nextcloud:/var/www/html
     environment:
+      - TZ=Asia/Shanghai
       - MYSQL_HOST=db
       - TRUSTED_PROXIES='192.168.0.0/16'
       - NEXTCLOUD_TRUSTED_DOMAINS=${host_ip}
       - OVERWRITEPROTOCOL=https
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - ./.private/db.env
     depends_on:
@@ -38,6 +51,8 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - /var/log/caddy:/var/log/caddy
       - ./.private:/etc/ssl/private
+    environment:
+      - TZ=Asia/Shanghai
     ports:
       - "443:443"
     restart: always
