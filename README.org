@@ -16,10 +16,6 @@ systemctl enable --now docker.service
 :header-args:bash: :tangle build.sh :file-mode (identity #o755) :shebang #!/usr/bin/env bash
 :END:
 
-*Cation!!*
-If you run =./build.sh= after =docker-compose up= your certificate will be
-updated
-
 tldr: run
 #+begin_src bash :tangle no
 git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
@@ -91,6 +87,11 @@ docker-compose pull
 docker-compose build --pull
 #+end_src
 
+clean redundant packages
+#+begin_src shell
+docker image prune
+#+end_src
+
 run with
 #+begin_src bash
 docker-compose up -d
@@ -107,6 +108,8 @@ show running containers with
 #+begin_src bash
 docker-compose ps -a
 #+end_src
+
+logs saved in [[file:/var/log/caddy]]
 
 * Notion
 
