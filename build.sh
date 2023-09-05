@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 [ -z "$1" ] || host_ip=xxx && host_ip="$1"
+# if inside GFW
+[ -z "$2" ] || proxy= && proxy="host.docker.internal:$2"
 
 expired () {
   ssl-cert-check -c "$1" -x 10 | awk '{print $2}' | tail -1 | cut -c-5
