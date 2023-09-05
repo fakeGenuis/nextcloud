@@ -1,0 +1,11 @@
+[Unit]
+Description=Docker nextcloud use host proxy by iptables
+Requires=docker.service
+After=network-online.target docker.service
+
+[Install]
+WantedBy=default.target
+
+[Service]
+ExecStart=/usr/bin/fish ${PWD}/host_proxy.fish
+Type=oneshot
