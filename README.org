@@ -24,6 +24,8 @@ git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
 
 #+begin_src bash
 [ -z "$1" ] || host_ip=xxx && host_ip="$1"
+# if inside GFW
+[ -z "$2" ] || proxy= && proxy="host.docker.internal:$2"
 #+end_src
 substitute xxx with your host's real ip
 
@@ -125,3 +127,6 @@ logs saved in [[file:/var/log/caddy]]
       1 => '\'172.16.0.0/12\'',
     ),
   #+end_src
+- use host proxy
+  [[https://docs.docker.com/network/proxy/#configure-the-docker-client][Configure Docker to use a proxy server | Docker Docs]]
+  but this cause all container use proxy, then there's error with =caddy=

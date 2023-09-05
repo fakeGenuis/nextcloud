@@ -37,6 +37,10 @@ services:
       - TRUSTED_PROXIES='192.168.0.0/16'
       - NEXTCLOUD_TRUSTED_DOMAINS=${host_ip}
       - OVERWRITEPROTOCOL=https
+      - HTTP_PROXY=${proxy}
+      - HTTPS_PROXY=${proxy}
+      - http_proxy=${proxy}
+      - https_proxy=${proxy}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
