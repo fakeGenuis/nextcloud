@@ -127,6 +127,14 @@ logs saved in [[file:/var/log/caddy]]
       1 => '\'172.16.0.0/12\'',
     ),
   #+end_src
+
+- add local external storage
+  #+begin_src docker-compose
+    volumes:
+      - /local/path:/docker/path
+  #+end_src
+  [[https://docs.nextcloud.com/server/25/admin_manual/configuration_files/external_storage/local.html][Local — Nextcloud latest Administration Manual latest documentation]]
+
 - use host proxy
   [[https://docs.docker.com/network/proxy/#configure-the-docker-client][Configure Docker to use a proxy server | Docker Docs]]
   but this cause all container use proxy, then there's error with =caddy=
