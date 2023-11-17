@@ -3,6 +3,7 @@ version: "3"
 volumes:
   db:
   nextcloud:
+  redis_data:
 
 # https://stackoverflow.com/a/43981857
 networks:
@@ -25,6 +26,15 @@ services:
     env_file:
       - ./.private/db.env
 
+  redis:
+    image: redis
+    container_name: nc_redis
+    command: redis-server --requirepass $$REDIS_HOST_PASSWORD
+    env_file:
+      - ./.private/db.env
+    volumes:
+      - redis_data:/data
+
   app:
     image: nextcloud
     container_name: nc_app
@@ -37,6 +47,8 @@ services:
       - TRUSTED_PROXIES='192.168.0.0/16'
       - NEXTCLOUD_TRUSTED_DOMAINS=${host_ip}
       - OVERWRITEPROTOCOL=https
+      - REDIS_HOST=redis
+      - REDIS_HOST_PORT=6379
       - HTTP_PROXY=${proxy}
       - HTTPS_PROXY=${proxy}
       - http_proxy=${proxy}
@@ -47,6 +59,7 @@ services:
       - ./.private/db.env
     depends_on:
       - db
+      - redis
 
   caddy:
     image: caddy

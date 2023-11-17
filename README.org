@@ -78,11 +78,11 @@ MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 MYSQL_DATABASE=nextcloud
 MYSQL_USER=nextcloud
+REDIS_HOST_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 EOF
 #+end_src
 
 * Usage and maintain
-
 pull and build (or update) with
 #+begin_src bash
 docker-compose pull
@@ -138,3 +138,20 @@ logs saved in [[file:/var/log/caddy]]
 - use host proxy
   [[https://docs.docker.com/network/proxy/#configure-the-docker-client][Configure Docker to use a proxy server | Docker Docs]]
   but this cause all container use proxy, then there's error with =caddy=
+- Should I use =Redis=
+  #+begin_quote from GPT-3.5
+Caching helps reduce the load on the primary storage and speeds up access to
+frequently accessed data. While Redis is fast, it is an in-memory data store,
+meaning it stores all data in RAM.
+  #+end_quote
+
+  following lines only valid at first run
+  #+begin_example
+      - REDIS_HOST=redis
+      - REDIS_HOST_PORT=6379
+  #+end_example
+
+  ~\$\$~ may be substitute by random number in bash
+  #+begin_example
+    command: redis-server --requirepass $$REDIS_HOST_PASSWORD
+  #+end_example
