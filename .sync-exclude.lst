@@ -1,0 +1,4 @@
+private*
+.private/*
+docker-compose.*
+Caddyfile
