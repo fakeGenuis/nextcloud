@@ -28,4 +28,5 @@ MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 MYSQL_DATABASE=nextcloud
 MYSQL_USER=nextcloud
+REDIS_HOST_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
 EOF
