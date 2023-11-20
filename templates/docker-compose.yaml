@@ -29,7 +29,11 @@ services:
   redis:
     image: redis
     container_name: nc_redis
-    command: redis-server --requirepass $$REDIS_HOST_PASSWORD
+    # https://stackoverflow.com/a/72593084
+    command:
+      - /bin/sh
+      - -c
+      - redis-server --requirepass "$${REDIS_HOST_PASSWORD:?REDIS_HOST_PASSWORD variable is not set}"
     env_file:
       - ./.private/db.env
     volumes:
