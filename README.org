@@ -46,19 +46,21 @@ key_file=./.private/"${host_ip}".crt
    printf "[dn]\nCN=${host_ip}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:${host_ip}\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
 #+end_src
 =${host_ip}= is your machine's real ip. For more details see
-- [[https://wiki.archlinux.org/title/OpenSSL#Generate_a_self-signed_certificate_with_private_key_in_a_single_command][Generate_a_self-signed_certificate_with_private_key_in_a_single_command]]
-- [[https://letsencrypt.org/docs/certificates-for-localhost/#making-and-trusting-your-own-certificates][making-and-trusting-your-own-certificates]].
+[[https://wiki.archlinux.org/title/OpenSSL#Generate_a_self-signed_certificate_with_private_key_in_a_single_command][Generate_a_self-signed_certificate_with_private_key_in_a_single_command]]
+[[https://letsencrypt.org/docs/certificates-for-localhost/#making-and-trusting-your-own-certificates][making-and-trusting-your-own-certificates]].
 
-change =${host_ip}= in ~caddyfile~ to your machine's real ip. Append password
-after =MYSQL_ROOT_PASSWORD= in ~docker-compose.yaml~.
-
-FIXME =envsubst= not work properly
-#+begin_src bash :tangle no
-cat ./templates/Caddyfile | envsubst > Caddyfile
-cat ./templates/docker-compose.yaml | envsubst > docker-compose.yaml
+=./.private/db.env= should have following contents.
+#+begin_src bash
+[ -f ./.private/db.env ] || cat > ./.private/db.env <<EOF
+MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&)
+MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&)
+MYSQL_DATABASE=nextcloud
+MYSQL_USER=nextcloud
+REDIS_HOST_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&)
+EOF
 #+end_src
 
-see [[https://stackoverflow.com/questions/2914220/bash-templating-how-to-build-configuration-files-from-templates-with-bash][Bash Templating: How to build configuration files from templates with Bash? -...]]
+[[https://stackoverflow.com/questions/2914220/bash-templating-how-to-build-configuration-files-from-templates-with-bash][Bash Templating: How to build configuration files from templates with Bash? -...]]
 #+begin_src bash
 envsub () {
     eval "cat <<EOF
@@ -66,19 +68,11 @@ $(<$1)
 EOF"
 }
 
+. ./.private/db.env
+
+# FIXME try built in =envsubst=
 envsub ./templates/Caddyfile > Caddyfile
 envsub ./templates/docker-compose.yaml > docker-compose.yaml
-#+end_src
-
-=./.private/db.env= should have following contents.
-#+begin_src bash
-[ -f ./.private/db.env ] || cat > ./.private/db.env <<EOF
-MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
-MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
-MYSQL_DATABASE=nextcloud
-MYSQL_USER=nextcloud
-REDIS_HOST_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
-EOF
 #+end_src
 
 * Usage and maintain
