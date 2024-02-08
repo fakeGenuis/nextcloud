@@ -2,31 +2,30 @@
 
 * Requirements
 1. ~docker~ and ~docker-compose~
-
-   #+begin_src bash
-pacman -S docker docker-compose pwgen ssl-cert-check
-systemctl enable --now docker.service
-   #+end_src
-
 2. ~openssl~
 
-* Configuration
-:PROPERTIES:
-:header-args:bash: :tangle build.sh :file-mode (identity #o755) :shebang #!/usr/bin/env bash
-:END:
+#+begin_src fish :eval no
+pacman -S docker docker-compose pwgen ssl-cert-check
+sudo systemctl enable --now docker.service
+#+end_src
 
-tldr: run
+* Usage
 #+begin_src bash :tangle no
 git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
 ./build.sh xxx
 #+end_src
+substitute =xxx= with your host's real ip
+
+* Details and tangle of =build.sh=
+:PROPERTIES:
+:header-args:bash: :tangle build.sh :file-mode (identity #o755) :shebang #!/usr/bin/env bash
+:END:
 
 #+begin_src bash
 [ -z "$1" ] && host_ip=xxx || host_ip="$1"
 # if inside GFW
 [ -z "$2" ] && proxy= || proxy="host.docker.internal:$2"
 #+end_src
-substitute xxx with your host's real ip
 
 check if a certificate file is expire within 10 days
 #+begin_src bash
@@ -75,77 +74,37 @@ envsub ./templates/Caddyfile > Caddyfile
 envsub ./templates/docker-compose.yaml > docker-compose.yaml
 #+end_src
 
-* Usage and maintain
-pull and build (or update) with
-#+begin_src bash
-docker-compose pull
-docker-compose build --pull
-#+end_src
-
-clean redundant packages
-#+begin_src shell
-docker image prune
-#+end_src
-
-run with
-#+begin_src bash
-docker-compose up -d
-#+end_src
-note that the database and nextcloud files are stored within docker volume, so
-don't prune them accidentally.
-
-stop with
-#+begin_src bash
-docker-compose down
-#+end_src
-
-show running containers with
-#+begin_src bash
-docker-compose ps -a
-#+end_src
-
-logs saved in [[file:/var/log/caddy]]
-
 * Notion
-- This is for =proxy header not configured rightly= warning
+** "proxy header not configured rightly"
 
-  Space separated list for =TRUSTED_PROXIES= in ~docker-compose.yml~ may not
-  work properly, you may add following entry in
-  ~/var/www/html/config/config.php~ in the docker container.
-  #+begin_src php
-    'trusted_proxies' =>
-    array (
-      0 => '\'192.168.0.0/16\'',
-      1 => '\'172.16.0.0/12\'',
-    ),
-  #+end_src
+Space separated list for =TRUSTED_PROXIES= in ~docker-compose.yml~ may not work
+properly, you may add following entry in ~/var/www/html/config/config.php~ in
+the docker container.
+#+begin_src php
+  'trusted_proxies' =>
+  array (
+    0 => '\'192.168.0.0/16\'',
+    1 => '\'172.16.0.0/12\'',
+  ),
+#+end_src
 
-- add local external storage
-  #+begin_src docker-compose
-    volumes:
-      - /local/path:/docker/path
-  #+end_src
-  [[https://docs.nextcloud.com/server/25/admin_manual/configuration_files/external_storage/local.html][Local — Nextcloud latest Administration Manual latest documentation]]
+** add local external storage
+[[https://docs.nextcloud.com/server/25/admin_manual/configuration_files/external_storage/local.html][Local — Nextcloud latest Administration Manual latest documentation]]
 
-- use host proxy
-  [[https://docs.docker.com/network/proxy/#configure-the-docker-client][Configure Docker to use a proxy server | Docker Docs]]
-  but this cause all container use proxy, then there's error with =caddy=
-  for proxy only inside nextcloud app, see [[file:./templates/docker-compose.yaml]]
+#+begin_src docker-compose
+  volumes:
+    - /local/path:/docker/path
+#+end_src
 
-- Should I use =Redis=
-  #+begin_quote from GPT-3.5
+** use host proxy
+[[https://docs.docker.com/network/proxy/#configure-the-docker-client][Configure Docker to use a proxy server | Docker Docs]]
+
+but this cause all container use proxy, then there's error with =caddy= for
+proxy only inside nextcloud app, see [[file:./templates/docker-compose.yaml]]
+
+** Should I use =Redis=
+#+begin_quote from GPT-3.5
 Caching helps reduce the load on the primary storage and speeds up access to
 frequently accessed data. While Redis is fast, it is an in-memory data store,
 meaning it stores all data in RAM.
-  #+end_quote
-
-  following lines only valid at first run
-  #+begin_example
-      - REDIS_HOST=redis
-      - REDIS_HOST_PORT=6379
-  #+end_example
-
-  ~\$\$~ may be substitute by random number in bash
-  #+begin_example
-    command: redis-server --requirepass $$REDIS_HOST_PASSWORD
-  #+end_example
+#+end_quote
