@@ -14,19 +14,22 @@ key_file=./.private/"${host_ip}".crt
   -subj "/CN=${host_ip}" -extensions EXT -config <( \
    printf "[dn]\nCN=${host_ip}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:${host_ip}\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
 
+[ -f ./.private/db.env ] || cat > ./.private/db.env <<EOF
+MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&)
+MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&)
+MYSQL_DATABASE=nextcloud
+MYSQL_USER=nextcloud
+REDIS_HOST_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&)
+EOF
+
 envsub () {
     eval "cat <<EOF
 $(<$1)
 EOF"
 }
 
+. ./.private/db.env
+
+# FIXME try built in =envsubst=
 envsub ./templates/Caddyfile > Caddyfile
 envsub ./templates/docker-compose.yaml > docker-compose.yaml
-
-[ -f ./.private/db.env ] || cat > ./.private/db.env <<EOF
-MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
-MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
-MYSQL_DATABASE=nextcloud
-MYSQL_USER=nextcloud
-REDIS_HOST_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,)
-EOF
