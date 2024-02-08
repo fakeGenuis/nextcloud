@@ -108,3 +108,12 @@ Caching helps reduce the load on the primary storage and speeds up access to
 frequently accessed data. While Redis is fast, it is an in-memory data store,
 meaning it stores all data in RAM.
 #+end_quote
+
+** =zotero= self signed certificate
+[[https://www.zotero.org/support/kb/cert_override][kb:cert override {Zotero Documentation}]]
+[[https://github.com/Osmose/firefox-cert-override][GitHub - Osmose/firefox-cert-override: Python library and CLI for reading and...]]
+
+#+begin_src fish
+pipx install firefox-cert-override
+~/.local/bin/firefox-cert-override xxx:443=xxx.crt[U] > cert_override.txt
+#+end_src
