@@ -26,6 +26,7 @@ substitute =xxx= with your host's real ip
 # if inside GFW
 [ -z "$2" ] && proxy= || proxy="host.docker.internal:$2"
 #+end_src
+~host.docker.internal:$2~ is for share host proxy
 
 check if a certificate file is expire within 10 days
 #+begin_src bash
