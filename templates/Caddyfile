@@ -12,13 +12,13 @@
         output file /var/log/caddy/web.log
     }
 
+    redir /.well-known/carddav /remote.php/dav/ 301
+    redir /.well-known/caldav /remote.php/dav/ 301
+
     reverse_proxy app:80 {
         header_up X-Real-IP {remote_host}
         header_down Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" #enable HSTS
     }
 
     tls /etc/ssl/private/${host_ip}.crt /etc/ssl/private/${host_ip}.key
-
-    rewrite /.well-known/carddav /remote.php/dav
-    rewrite /.well-known/caldav /remote.php/dav
 }
