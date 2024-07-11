@@ -28,11 +28,11 @@ services:
     image: redis
     container_name: nc_redis
     restart: unless-stopped
-    # https://stackoverflow.com/a/72593084
+    # https://github.com/nextcloud/docker/issues/1608
     command:
       - /bin/sh
       - -c
-      - redis-server --requirepass "${REDIS_HOST_PASSWORD}"
+      - redis-server --requirepass "\$\$REDIS_HOST_PASSWORD"
     env_file:
       - ./.private/db.env
     volumes:
