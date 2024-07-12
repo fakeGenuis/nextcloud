@@ -16,6 +16,20 @@ git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
 #+end_src
 substitute =xxx= with your host's real ip
 
+* Configuration
+To change =config.php= for nextcloud
+#+begin_src shell
+docker cp nc_app:/var/www/html/config/config.php config.php
+..do some edit
+docker cp config.php nc_app:/var/www/html/config/config.php
+docker exec nc_app chown www-data:www-data /var/www/html/config/config.php
+#+end_src
+
+To see detail configurations on current running
+#+begin_src shell
+docker exec -u www-data nc_app php occ config:system:get trusted_proxies 0
+#+end_src
+
 * Details and tangle of =build.sh=
 :PROPERTIES:
 :header-args:bash: :tangle build.sh :file-mode (identity #o755) :shebang #!/usr/bin/env bash
