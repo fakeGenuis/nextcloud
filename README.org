@@ -76,8 +76,42 @@ envsub ./templates/docker-compose.yaml > docker-compose.yaml
 #+end_src
 
 * Notion
-** "proxy header not configured rightly"
+** DONE =trusted_proxies=
+CLOSED: [2024-07-12 Fri 11:28]
 
+trust from named "caddy" container, not supported with docker-compose. And not
+convenient to change =/var/www/html/config/config.php= in docker
+#+begin_src php :tangle no
+  'trusted_proxies' =>
+  array (
+    0 => gethostbyname('caddy'),
+    # 1 => '192.168.1.0/24',
+    # 2 => '172.18.0.0/12',
+  ),
+#+end_src
+
+should cover docker container's private ip
+#+begin_src docker-compose
+      - TRUSTED_PROXIES=172.16.0.0/12 192.168.0.0/24
+#+end_src
+
+mainly after upgrade to =v29=
+
+set via docker-compose, but not as a list of ip
+#+begin_quote
+Your "trusted_proxies" setting is not correctly set, it should be an array of IP
+addresses - optionally with range in CIDR notation.
+#+end_quote
+
+If not set
+#+begin_quote
+The reverse proxy header configuration is incorrect.
+#+end_quote
+
+** Ignore substituted but not templates file in nextcloud
+for privacy
+
+** "proxy header not configured rightly"
 Space separated list for =TRUSTED_PROXIES= in ~docker-compose.yml~ may not work
 properly, you may add following entry in ~/var/www/html/config/config.php~ in
 the docker container.

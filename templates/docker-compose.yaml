@@ -47,7 +47,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - MYSQL_HOST=db
-      - TRUSTED_PROXIES='192.168.0.0/16'
+      - TRUSTED_PROXIES=172.16.0.0/12 192.168.0.0/24
       - NEXTCLOUD_TRUSTED_DOMAINS=${host_ip}
       - OVERWRITEPROTOCOL=https
       - REDIS_HOST=redis
@@ -56,7 +56,7 @@ services:
       - HTTPS_PROXY=${proxy}
       - http_proxy=${proxy}
       - https_proxy=${proxy}
-      - NO_PROXY=db, redis, localhost, 127.0.0.0/8
+      - NO_PROXY=db, caddy, redis, localhost, 127.0.0.0/8
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
