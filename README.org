@@ -52,11 +52,11 @@ key_file=./.private/"${host_ip}".crt
 =./.private/db.env= should have following contents.
 #+begin_src bash
 [ -f ./.private/db.env ] || cat > ./.private/db.env <<EOF
-MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&)
-MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&)
+MYSQL_ROOT_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&\=)
+MYSQL_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&\=)
 MYSQL_DATABASE=nextcloud
 MYSQL_USER=nextcloud
-REDIS_HOST_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&)
+REDIS_HOST_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&\=)
 EOF
 #+end_src
 
