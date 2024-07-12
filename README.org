@@ -122,21 +122,6 @@ If not set
 The reverse proxy header configuration is incorrect.
 #+end_quote
 
-** Ignore substituted but not templates file in nextcloud
-for privacy
-
-** "proxy header not configured rightly"
-Space separated list for =TRUSTED_PROXIES= in ~docker-compose.yml~ may not work
-properly, you may add following entry in ~/var/www/html/config/config.php~ in
-the docker container.
-#+begin_src php
-  'trusted_proxies' =>
-  array (
-    0 => '\'192.168.0.0/16\'',
-    1 => '\'172.16.0.0/12\'',
-  ),
-#+end_src
-
 ** add local external storage
 [[https://docs.nextcloud.com/server/25/admin_manual/configuration_files/external_storage/local.html][Local — Nextcloud latest Administration Manual latest documentation]]
 
