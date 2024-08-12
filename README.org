@@ -90,6 +90,11 @@ envsub ./templates/docker-compose.yaml > docker-compose.yaml
 #+end_src
 
 * Notion
+** The database is missing some indices
+#+begin_src shell
+docker exec -u www-data nc_app php occ db:add-missing-indices
+#+end_src
+
 ** DONE =trusted_proxies=
 CLOSED: [2024-07-12 Fri 11:28]
 
