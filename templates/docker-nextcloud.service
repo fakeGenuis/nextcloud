@@ -1,0 +1,8 @@
+[Unit]
+Description=Docker nextcloud backgroud jobs
+
+[Service]
+Type=oneshot
+LogLevelMax=alert
+SyslogLevel=2
+ExecStart=/usr/bin/docker exec -u www-data nc_app php -f /var/www/html/cron.php

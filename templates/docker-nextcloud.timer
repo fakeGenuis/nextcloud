@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer for docker nextcloud backgroud jobs
+
+[Timer]
+OnStartupSec=5min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=default.target
