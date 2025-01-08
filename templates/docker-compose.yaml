@@ -13,7 +13,7 @@ networks:
 
 services:
   db:
-    image: mariadb
+    image: mariadb:11.4
     container_name: nc_db
     restart: always
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
@@ -28,6 +28,7 @@ services:
     image: redis
     container_name: nc_redis
     restart: unless-stopped
+    # https://stackoverflow.com/a/72593084
     # https://github.com/nextcloud/docker/issues/1608
     command:
       - /bin/sh
