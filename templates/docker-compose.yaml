@@ -81,3 +81,16 @@ services:
     depends_on:
       - db
       - app
+
+  frpc:
+    image: ghcr.io/fatedier/frpc:v0.71.0
+    container_name: nc_frpc
+    restart: always
+    network_mode: host
+    volumes:
+      - ./.private/frpc.toml:/etc/frp/frpc.toml:ro
+    command:
+      - -c
+      - /etc/frp/frpc.toml
+    depends_on:
+      - caddy

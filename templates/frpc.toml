@@ -1,0 +1,16 @@
+serverAddr = "<frp-server-address>"
+serverPort = 7000
+
+auth.method = "token"
+auth.token = "<frp-auth-token>"
+
+transport.tls.enable = true
+
+[[proxies]]
+name = "nextcloud-443"
+type = "tcp"
+
+localIP = "127.0.0.1"
+localPort = 443
+
+remotePort = <remote-port>

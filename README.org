@@ -30,6 +30,15 @@ To see detail configurations on current running
 docker exec -u www-data nc_app php occ config:system:get trusted_proxies 0
 #+end_src
 
+Expose the local =caddy= through an =frp= server (optional). The =frpc= service
+mounts =./.private/frpc.toml=, so copy the sample and fill in your own values:
+#+begin_src shell
+cp templates/frpc.toml .private/frpc.toml
+# edit serverAddr, auth.token and remotePort in .private/frpc.toml
+#+end_src
+The token is deployment-specific and is intentionally *not* rendered by
+=build.sh=; keep the populated file under =./.private/= so it stays untracked.
+
 * Details and tangle of =build.sh=
 :PROPERTIES:
 :header-args:bash: :tangle build.sh :file-mode (identity #o755) :shebang #!/usr/bin/env bash
