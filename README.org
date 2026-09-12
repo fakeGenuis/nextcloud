@@ -30,6 +30,13 @@ To see detail configurations on current running
 docker exec -u www-data nc_app php occ config:system:get trusted_proxies 0
 #+end_src
 
+Mount extra storage
+#+begin_src yaml
+  app:
+    volumes:
+      - /mnt/Data/foo:/share/foo
+#+end_src
+
 Expose the local =caddy= through an =frp= server (optional). The =frpc= service
 mounts =./.private/frpc.toml=, so copy the sample and fill in your own values:
 #+begin_src shell
@@ -99,6 +106,13 @@ envsub ./templates/docker-compose.yaml > docker-compose.yaml
 #+end_src
 
 * Notion
+** Does cron jobs really needed?
+[[https://docs.nextcloud.com/server/29/admin_manual/configuration_server/background_jobs_configuration.html][Background jobs — Nextcloud latest Administration Manual latest documentation]]
+I have a nextcloud instance without cron / systemd jobs running, it only complains
+#+begin_quote
+Server has no maintenance window start time configured.
+#+end_quote
+
 ** The database is missing some indices
 #+begin_src shell
 docker exec -u www-data nc_app php occ db:add-missing-indices
