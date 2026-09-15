@@ -1,3 +1,4 @@
 docker-compose.yaml
 Caddyfile
+frpc.toml
 .private/*
