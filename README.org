@@ -14,7 +14,9 @@ sudo systemctl enable --now docker.service
 git clone git@github.com:Lishux/nextcloud.git && cd nextcloud
 ./build.sh xxx
 #+end_src
-substitute =xxx= with your host's real ip
+substitute =xxx= with the private hostname used for the self-signed certificate.
+An optional third argument sets the public hostname that owns a trusted
+certificate.
 
 * Configuration
 To change =config.php= for nextcloud
@@ -46,36 +48,64 @@ cp templates/frpc.toml .private/frpc.toml
 The token is deployment-specific and is intentionally *not* rendered by
 =build.sh=; keep the populated file under =./.private/= so it stays untracked.
 
+HSTS is sent *only* for the public host, which has a trusted certificate. If it
+were also sent for the self-signed host, a cached HSTS policy would block the
+"trust" dialog after the certificate is renewed.
+#+begin_src caddyfile
+    @public host ${public_host}
+    header @public Strict-Transport-Security "max-age=31536000"
+#+end_src
+
 * Details and tangle of =build.sh=
 :PROPERTIES:
 :header-args:bash: :tangle build.sh :file-mode (identity #o755) :shebang #!/usr/bin/env bash
 :END:
 
 #+begin_src bash
-[ -z "$1" ] && host_ip=xxx || host_ip="$1"
+[ -z "$1" ] && host_name=xxx || host_name="$1"
 # if inside GFW
 [ -z "$2" ] && proxy= || proxy="host.docker.internal:$2"
+# public hostname with a trusted certificate (gets HSTS); leave xxx to disable
+[ -z "$3" ] && public_host=xxx || public_host="$3"
 #+end_src
 ~host.docker.internal:$2~ is for share host proxy
 
-check if a certificate file is expire within 10 days
+check if a certificate file is missing or expires within 10 days
 #+begin_src bash
 expired () {
-  ssl-cert-check -c "$1" -x 10 | awk '{print $2}' | tail -1 | cut -c-5
+  local cert="$1"
+  [ -f "$cert" ] || return 0
+  if command -v ssl-cert-check >/dev/null 2>&1; then
+    ssl-cert-check -c "$cert" -x 10 | awk '{print $2}' | tail -1 | cut -c-5 | grep -q '^Expir'
+  else
+    openssl x509 -in "$cert" -noout -checkend $((10 * 24 * 3600)) >/dev/null 2>&1 && return 1 || return 0
+  fi
 }
 #+end_src
-Expired or expiring certificate (after 10 days) begins with "Expir"
+Returns true when the file is absent, unreadable, or about to expire, so a
+missing =ssl-cert-check= no longer silently counts as "still valid".
 
 create a self-signed certificate in your private directory (=./.private= here)
 #+begin_src bash
-[ -d ./.private ] || mkdir ./.private/
-key_file=./.private/"${host_ip}".crt
-[ -f "$key_file" ] && [ "$(expired $key_file)" != "Expir" ] || openssl req -x509 -out ./.private/${host_ip}.crt -keyout ./.private/${host_ip}.key \
-  -newkey rsa:4096 -nodes -sha256 -days 90\
-  -subj "/CN=${host_ip}" -extensions EXT -config <( \
-   printf "[dn]\nCN=${host_ip}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:${host_ip}\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+[ -d ./.private ] || mkdir -p ./.private/
+crt=./.private/"${host_name}".crt
+key=./.private/"${host_name}".key
+if [ ! -f "$crt" ] || [ ! -f "$key" ] || expired "$crt"; then
+  if printf '%s' "$host_name" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+    san="IP:${host_name}"
+  else
+    san="DNS:${host_name}"
+  fi
+  openssl req -x509 -out "$crt" -keyout "$key" \
+    -newkey rsa:4096 -nodes -sha256 -days 90 \
+    -subj "/CN=${host_name}" -extensions EXT -config <( \
+     printf "[dn]\nCN=%s\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=%s\nkeyUsage=digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth" \
+       "${host_name}" "${san}")
+  chmod 600 "$key"
+fi
 #+end_src
-=${host_ip}= is your machine's real ip. For more details see
+=${host_name}= is the private hostname for the certificate; an IPv4 value goes
+into the =IP:= SAN, anything else into =DNS:=. For more details see
 [[https://wiki.archlinux.org/title/OpenSSL#Generate_a_self-signed_certificate_with_private_key_in_a_single_command][Generate_a_self-signed_certificate_with_private_key_in_a_single_command]]
 [[https://letsencrypt.org/docs/certificates-for-localhost/#making-and-trusting-your-own-certificates][making-and-trusting-your-own-certificates]].
 

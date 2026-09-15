@@ -49,7 +49,7 @@ services:
       - TZ=Asia/Shanghai
       - MYSQL_HOST=db
       - TRUSTED_PROXIES=172.16.0.0/12 192.168.0.0/24
-      - NEXTCLOUD_TRUSTED_DOMAINS=${host_ip}
+      - NEXTCLOUD_TRUSTED_DOMAINS=${host_name}
       - OVERWRITEPROTOCOL=https
       - REDIS_HOST=redis
       - REDIS_HOST_PORT=6379
