@@ -1,8 +1,13 @@
-#+TITLE: Build nextcloud with a self-signed https in docker
+#+TITLE: Nextcloud in docker with self-signed and public https
+
+Runs Nextcloud in docker behind Caddy: a self-signed certificate serves a
+private hostname for direct/LAN access, and an optional public hostname with a
+trusted certificate serves external access (for example through an frp tunnel).
 
 * Requirements
 1. ~docker~ and ~docker-compose~
 2. ~openssl~
+3. optional: ~ssl-cert-check~ (falls back to =openssl -checkend= when absent)
 
 #+begin_src fish :eval no
 pacman -S docker docker-compose pwgen ssl-cert-check
@@ -30,13 +35,6 @@ docker exec nc_app chown www-data:www-data /var/www/html/config/config.php
 To see detail configurations on current running
 #+begin_src shell
 docker exec -u www-data nc_app php occ config:system:get trusted_proxies 0
-#+end_src
-
-Mount extra storage
-#+begin_src yaml
-  app:
-    volumes:
-      - /mnt/Data/foo:/share/foo
 #+end_src
 
 Expose the local =caddy= through an =frp= server (optional). The =frpc= service
@@ -67,6 +65,9 @@ were also sent for the self-signed host, a cached HSTS policy would block the
 [ -z "$2" ] && proxy= || proxy="host.docker.internal:$2"
 # public hostname with a trusted certificate (gets HSTS); leave xxx to disable
 [ -z "$3" ] && public_host=xxx || public_host="$3"
+if [ "$public_host" = xxx ]; then
+  echo "warning: public_host not set, HSTS will not be sent" >&2
+fi
 #+end_src
 ~host.docker.internal:$2~ is for share host proxy
 
@@ -88,6 +89,7 @@ missing =ssl-cert-check= no longer silently counts as "still valid".
 create a self-signed certificate in your private directory (=./.private= here)
 #+begin_src bash
 [ -d ./.private ] || mkdir -p ./.private/
+chmod 700 ./.private
 crt=./.private/"${host_name}".crt
 key=./.private/"${host_name}".key
 if [ ! -f "$crt" ] || [ ! -f "$key" ] || expired "$crt"; then
@@ -118,21 +120,19 @@ MYSQL_DATABASE=nextcloud
 MYSQL_USER=nextcloud
 REDIS_HOST_PASSWORD=$(pwgen -c -n -y -s -1 -r \$\#\,\&\=)
 EOF
+chmod 600 ./.private/db.env
+[ -f ./.private/frpc.toml ] && chmod 600 ./.private/frpc.toml
 #+end_src
 
-[[https://stackoverflow.com/questions/2914220/bash-templating-how-to-build-configuration-files-from-templates-with-bash][Bash Templating: How to build configuration files from templates with Bash? -...]]
+render the templates with =envsubst=, keeping a timestamped backup of the
+previous output before overwriting it.
 #+begin_src bash
-envsub () {
-    eval "cat <<EOF
-$(<$1)
-EOF"
-}
-
-. ./.private/db.env
-
-# FIXME try built in =envsubst=
-envsub ./templates/Caddyfile > Caddyfile
-envsub ./templates/docker-compose.yaml > docker-compose.yaml
+export host_name public_host proxy
+for f in Caddyfile docker-compose.yaml; do
+  [ -f "$f" ] && cp -a "$f" "$f.bak.$(date +%s)"
+done
+envsubst '${host_name} ${public_host} ${proxy}' < templates/Caddyfile > Caddyfile
+envsubst '${host_name} ${public_host} ${proxy}' < templates/docker-compose.yaml > docker-compose.yaml
 #+end_src
 
 * Notion

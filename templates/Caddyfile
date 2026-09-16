@@ -9,7 +9,11 @@
 :443 {
     encode zstd gzip
     log {
-        output file /var/log/caddy/web.log
+        output file /var/log/caddy/web.log {
+            roll_size 10MiB
+            roll_keep 5
+            roll_keep_for 168h
+        }
     }
 
     redir /.well-known/carddav /remote.php/dav/ 301
